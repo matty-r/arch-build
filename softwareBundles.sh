@@ -4,7 +4,8 @@ SOFTWAREBUNDLESROOT=${SOFTWAREBUNDLESPATH%/*}
 
 declare -a gamingPackages nvidiaPackages virtualPackages rdpPackages dailyPackages officePackages mediaPackages
 declare -a adminPackages devPackages kdePackages gnomePackages xfcePackages kdeThemePackages grubThemePackages
-declare -a vboxGuestPackages qemuGuestPackages hyperGuestPackages amdgpuPackages esxiGuestPackages
+declare -a vboxGuestPackages qemuGuestPackages hyperGuestPackages amdgpuPackages esxiGuestPackages grubPackages
+declare -a refindPackages
 declare -A availableBundles
 
 #Software Bundles
@@ -16,6 +17,10 @@ availableBundles[office]=officePackages
 availableBundles[media]=mediaPackages
 availableBundles[admin]=adminPackages
 availableBundles[dev]=devPackages
+
+#Boot Bundles
+availableBundles[grub]=grubPackages
+availableBundles[refind]=refindPackages
 
 #Guest Type Bundles
 availableBundles[vboxGuest]=vboxGuestPackages
@@ -60,14 +65,12 @@ adminPackages=(rsync filezilla networkmanager-openvpn remmina-git freerdp-git gn
 devPackages=(visual-studio-code-bin qtcreator)
 
 #Boot Packages
-## TODO
-#grubPackages=()
+grubPackages=(grub "$CPUTYPE"-ucode os-prober efibootmgr)
+refindPackages=(refind-efi "$CPUTYPE"-ucode)
 
 #Wine Gaming Packages
 #https://github.com/lutris/lutris/wiki/Game:-Blizzard-App
 battleNetPackages=(lib32-gnutls lib32-libldap lib32-libgpg-error lib32-sqlite lib32-libpulse wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs)
-
-## Add to /etc/environment "VK_ICD_FILENAMES=/" See Arch Wiki vulkan
 
 #Arch Linux Base
 archBasePackages=(base "${USERVARIABLES[KERNEL]}" "${USERVARIABLES[KERNEL]}"-headers linux-firmware cryptsetup sudo device-mapper e2fsprogs ntfs-3g inetutils logrotate lvm2 man-db mdadm nano netctl pciutils perl procps-ng sysfsutils texinfo usbutils util-linux vi xfsprogs openssh git autoconf automake binutils bison fakeroot findutils flex gcc libtool m4 make pacman patch pkgconf which networkmanager btrfs-progs unzip wget alsa-utils htop)
@@ -86,7 +89,6 @@ amdgpuPackages=(mesa lib32-mesa xf86-video-amdgpu vulkan-radeon lib32-vulkan-rad
 ##Theming Packages
 kdeThemePackages=(numix-circle-icon-theme-git qogir-gtk-theme-git qogir-kde-theme-git)
 grubThemePackages=(arch-silence-grub-theme-git)
-
 
 ##Desktop Environment Packages
 kdePackages=(plasma kcalc konsole spectacle dolphin dolphin-plugins filelight kate kwalletmanager kdeconnect kdf kdialog kfind packagekit-qt5 ffmpegthumbs ark gwenview print-manager sddm partitionmanager firefox bluedevil)

@@ -16,7 +16,7 @@ do
   shift
 done
 
-nvidiaPackages-Config(){
+nvidiaPackages-Config(){    
   if [[  ${USERVARIABLES[KERNEL]} = "" ]]; then
     USERVARIABLES[KERNEL]=$(retrieveSettings 'KERNEL')
   fi
@@ -51,20 +51,48 @@ btrfsPackages-Config(){
 
   yay -S --noconfirm snapper grub-btrfs snap-pac
 
-  ##Enable grub boot crypto
-  ROOTUUID=$(sudo blkid -s UUID -o value "${USERVARIABLES[ROOTPART]}")
-  sudo sed -i 's|^GRUB_CMDLINE_LINUX="".*|GRUB_CMDLINE_LINUX="cryptdevice=UUID='"${ROOTUUID}"':root"|' /etc/default/grub
-  sudo sed -i 's|^#GRUB_ENABLE_CRYPTODISK=y.*|GRUB_ENABLE_CRYPTODISK=y|' /etc/default/grub
-
   ##Add the snapper config manually
   sudo cp /etc/snapper/config-templates/default /etc/snapper/configs/root
   sudo sed -i 's/SNAPPER_CONFIGS=""/SNAPPER_CONFIGS="root"/' /etc/conf.d/snapper
   
   ##enable grub snapshots
-  sudo systemctl enable grub-btrfs.path
-  sudo sed -i 's|^#GRUB_DISABLE_RECOVERY=.*|GRUB_DISABLE_RECOVERY=false|' /etc/default/grub
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
+  if [[ "${USERVARIABLES[BOOTLOADER]}" = "GRUB" ]]; then
+    sudo systemctl enable grub-btrfs.path
+    sudo sed -i 's|^#GRUB_DISABLE_RECOVERY=.*|GRUB_DISABLE_RECOVERY=false|' /etc/default/grub
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+  elif [[ "${USERVARIABLES[BOOTLOADER]}" = "REFIND" ]]; then
+    # sudo yay -S --noconfirm refind-btrfs\
+    ## TODO
+    echo "REFIND + BTRFS integration has not yet been implemented"
+  fi
   sudo systemctl enable snapper-boot.timer
+}
+
+refindPackages-Config(){
+sudo bash -c 'cat << EOF > /boot/refind_linux.conf
+"Boot with standard options"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux.img"
+"Boot using fallback initramfs"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux-fallback.img"
+"Boot to terminal"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
+EOF'
+}
+
+grubPackages-Config(){
+  if [[ "$BOOTTYPE" = "EFI" ]]; then
+    #runCommand pacman -S --noconfirm grub "$CPUTYPE"'-ucode' os-prober efibootmgr
+    sudo grub-install --target=x86_64-efi --efi-directory=/boot  --bootloader-id=GRUB --recheck
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+  else
+    #runCommand pacman -S --noconfirm grub "$CPUTYPE"'-ucode' os-prober
+    sudo grub-install --target=i386-pc "$ROOTDEVICE"
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+  fi
+
+  ##Enable grub boot crypto
+  if [[ "${USERVARIABLES[ENCRYPT]}" = "YES" ]]; then
+    ROOTUUID=$(sudo blkid -s UUID -o value "${USERVARIABLES[ROOTPART]}")
+    sudo sed -i 's|^GRUB_CMDLINE_LINUX="".*|GRUB_CMDLINE_LINUX="cryptdevice=UUID='"${ROOTUUID}"':root"|' /etc/default/grub
+    sudo sed -i 's|^#GRUB_ENABLE_CRYPTODISK=y.*|GRUB_ENABLE_CRYPTODISK=y|' /etc/default/grub
+  fi
 }
 
 ##TODO

@@ -36,9 +36,11 @@ USERVARIABLES[KERNEL]="linux-zen" ## https://wiki.archlinux.org/index.php/Kernel
 USERVARIABLES[BOOTPART]="/dev/vda1" ## Default Config: If $BOOTTYPE is BIOS, ROOTPART will be the same as BOOTPART (Only EFI needs the seperate partition)
 USERVARIABLES[BOOTMODE]="CREATE" ## "CREATE" will destroy the *DISK* with a new label, "FORMAT" will only format the partition, "LEAVE" will do nothing
 USERVARIABLES[ROOTPART]="/dev/vda2"
-USERVARIABLES[ROOTFILE]="BTRFS" ## EXT4 or BTRFS
-USERVARIABLES[ENCRYPT]="NO" ## YES or NO
 USERVARIABLES[ROOTMODE]="CREATE"
+USERVARIABLES[ROOTFILE]="BTRFS" ## EXT4 or BTRFS
+USERVARIABLES[BOOTLOADER]="GRUB" ## GRUB or REFIND
+USERVARIABLES[ENCRYPT]="NO" ## YES or NO
+
 
 # Script Variables. DO NOT CHANGE THESE
 SCRIPTPATH=$( readlink -m $( type -p $0 ))
@@ -116,6 +118,7 @@ generateSettings(){
   exportSettings "ROOTMODE" "${USERVARIABLES[ROOTMODE]}"
   exportSettings "ROOTFILE" "${USERVARIABLES[ROOTFILE]}"
   exportSettings "ENCRYPT" "${USERVARIABLES[ENCRYPT]}"
+  exportSettings "BOOTLOADER" "${USERVARIABLES[BOOTLOADER]}"
 
   #Grab the device chosen for the boot part
   BOOTDEVICE=$(getDevice "${USERVARIABLES[BOOTPART]}")
@@ -150,6 +153,7 @@ generateSettings(){
   else
     BOOTTYPE="BIOS"
   fi
+
   exportSettings "BOOTTYPE" "$BOOTTYPE"
 
   
@@ -213,6 +217,13 @@ generateSettings(){
   fi
 
   USERVARIABLES[BUNDLES]+=" $GPUBUNDLE"
+
+  if [[ "${USERVARIABLES[BOOTLOADER]}" =~ "GRUB" ]]; then
+    USERVARIABLES[BUNDLES]+=" grub"
+  elif [[ "${USERVARIABLES[BOOTLOADER]}" =~ "REFIND" ]]; then
+    USERVARIABLES[BUNDLES]+=" refind"
+  fi
+
   exportSettings "GPUBUNDLE" "$GPUBUNDLE"
   exportSettings "BUNDLES" "${USERVARIABLES[BUNDLES]}"
   #reset comparisons
@@ -385,13 +396,12 @@ importSettings(){
   USERVARIABLES[ENCRYPT]=$(retrieveSettings 'ENCRYPT')
   USERVARIABLES[ROOTPART]=$(retrieveSettings 'ROOTPART')
   USERVARIABLES[ROOTMODE]=$(retrieveSettings 'ROOTMODE')
+  USERVARIABLES[BOOTLOADER]=$(retrieveSettings 'BOOTLOADER')
 
   echo "Imported SCRIPTPATH=${SCRIPTPATH}"
   echo "Imported SCRIPTROOT=${SCRIPTROOT}"
   echo "Imported BOOTDEVICE=${BOOTDEVICE}"
   echo "Imported ROOTDEVICE=${ROOTDEVICE}"
-  echo "Imported ROOTFILE=${ROOTFILE}"
-  echo "Imported ENCRYPT=${ENCRYPT}"
   echo "Imported EFIPATH=${EFIPATH}"
   echo "Imported BOOTTYPE=${BOOTTYPE}"
   echo "Imported NETINT=${NETINT}"
@@ -407,6 +417,9 @@ importSettings(){
   echo "Imported ROOTPART=${USERVARIABLES[ROOTPART]}"
   echo "Imported ROOTMODE=${USERVARIABLES[ROOTMODE]}"
   echo "Imported BOOTMODE=${USERVARIABLES[BOOTMODE]}"
+  echo "Imported ROOTFILE=${USERVARIABLES[ROOTFILE]}"
+  echo "Imported ENCRYPT=${USERVARIABLES[ENCRYPT]}"
+  echo "Imported BOOTLOADER=${USERVARIABLES[BOOTLOADER]}"
 }
 
 #retrieveSettings 'SETTINGNAME'
@@ -672,15 +685,7 @@ rootPassword(){
 
 ### INSTALL BOOTLOADER AND MICROCODE
 readyForBoot(){ 
-  if [[ "$BOOTTYPE" = "EFI" ]]; then
-    runCommand pacman -S --noconfirm grub "$CPUTYPE"'-ucode' os-prober efibootmgr
-    runCommand grub-install --target=x86_64-efi --efi-directory=/boot  --bootloader-id=GRUB --recheck
-    runCommand grub-mkconfig -o /boot/grub/grub.cfg
-  else
-    runCommand pacman -S --noconfirm grub "$CPUTYPE"'-ucode' os-prober
-    runCommand grub-install --target=i386-pc "$ROOTDEVICE"
-    runCommand grub-mkconfig -o /boot/grub/grub.cfg
-  fi
+  echo "Moved to softwareBundles and bundleConfigurators"
 }
 
 ## Create the new user and add them to the wheel group.
@@ -715,8 +720,8 @@ enableMultilibPackages(){
 ###### make yay
 makeYay(){
   if [[ $(pacman -Ss "yay-bin") ]]; then
-          echo "yay-bin found custom repo.. install direct"
-          runCommand sudo pacman -S yay-bin --noconfirm
+    echo "yay-bin found custom repo.. install direct"
+    runCommand sudo pacman -S yay-bin --noconfirm
   else
     runCommand cd /home/"${USERVARIABLES[USERNAME]}"
     runCommand git clone https://aur.archlinux.org/yay-bin.git
