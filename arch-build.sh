@@ -55,11 +55,11 @@ GPUBUNDLE=""
 INSTALLSTAGE=""
 
 if [ ! -f "$SCRIPTROOT"/bundleConfigurators.sh ]; then
-  curl -LO https://raw.githubusercontent.com/matty-r/lazy-arch/master/bundleConfigurators.sh
+  curl -LO https://raw.githubusercontent.com/matty-r/lazy-arch/bootloader-option/bundleConfigurators.sh
 fi
 
 if [ ! -f "$SCRIPTROOT"/softwareBundles.sh ]; then
-  curl -LO https://raw.githubusercontent.com/matty-r/lazy-arch/master/softwareBundles.sh
+  curl -LO https://raw.githubusercontent.com/matty-r/lazy-arch/bootloader-option/softwareBundles.sh
 fi
 
 if [ ! -f "$SCRIPTROOT"/softwareBundles.sh ] || [ ! -f "$SCRIPTROOT"/softwareBundles.sh ]; then
@@ -584,8 +584,16 @@ setLocalMirrors(){
     echo "Write Local Mirrors to /etc/pacman.d/mirrorlist"
   else
   
-  runCommand curl -s "https://archlinux.org/mirrorlist/?country=${COUNTRYCODE}&protocol=https&use_mirror_status=on" | sed "s/#Server/Server/" > /etc/pacman.d/mirrorlist
+  runCommand curl -s "https://archlinux.org/mirrorlist/?country=${COUNTRYCODE}&protocol=https&use_mirror_status=on" > /etc/pacman.d/mirrorlist
+  
+  echo 'Server = http://arch-repo.home.rho:15678/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 
+  {
+   echo '[myaur]'
+   echo 'SigLevel = Optional TrustAll'
+   echo 'Server = http://arch-repo.home.rho:15678/myaur'
+  } >> /etc/pacman.conf  
+  
   fi
 }
 
