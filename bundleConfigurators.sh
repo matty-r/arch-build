@@ -72,17 +72,17 @@ refindPackages-Config(){
 ROOTUUID=$(sudo blkid -s UUID -o value "${USERVARIABLES[ROOTPART]}")
 
 if [[ "${USERVARIABLES[ROOTFILE]}" = "BTRFS" ]]; then
-  sudo refind-install --alldrivers
-  sudo sed -i 's|also_scan_dirs.*|& @/boot|g' /boot/EFI/refind/refind.conf
+  sudo refind-install --alldrivers ## Change this to only copy across the drivers for btrfs - https://wiki.archlinux.org/index.php/REFInd_#Btrfs_subvolume_support
+  sudo sed -i 's|#also_scan_dirs.*|&,@/boot|g' /boot/EFI/refind/refind.conf ## Need to remove # from start of line
   BTRFSEXTRA="rootflags=subvol=@ "
 else
   sudo refind-install
 fi
 
 sudo bash -c 'cat << EOF > /boot/refind_linux.conf
-"Boot with standard options"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img"
-"Boot using fallback initramfs"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux-fallback.img"
-"Boot to terminal"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
+"Boot with standard options"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-'"${USERVARIABLES[KERNEL]}"'.img"
+"Boot using fallback initramfs"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-'"${USERVARIABLES[KERNEL]}"'-fallback.img"
+"Boot to terminal"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-'"${USERVARIABLES[KERNEL]}"'.img systemd.unit=multi-user.target"
 EOF'
 }
 

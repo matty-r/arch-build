@@ -65,15 +65,15 @@ adminPackages=(rsync filezilla networkmanager-openvpn remmina-git freerdp-git gn
 devPackages=(visual-studio-code-bin qtcreator)
 
 #Boot Packages
-grubPackages=(grub "$CPUTYPE"-ucode os-prober efibootmgr)
-refindPackages=(refind "$CPUTYPE"-ucode)
+grubPackages=(grub os-prober efibootmgr)
+refindPackages=(refind)
 
 #Wine Gaming Packages
 #https://github.com/lutris/lutris/wiki/Game:-Blizzard-App
 battleNetPackages=(lib32-gnutls lib32-libldap lib32-libgpg-error lib32-sqlite lib32-libpulse wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama ncurses lib32-ncurses opencl-icd-loader lib32-opencl-icd-loader libxslt lib32-libxslt libva lib32-libva gtk3 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs)
 
 #Arch Linux Base
-archBasePackages=(base "${USERVARIABLES[KERNEL]}" "${USERVARIABLES[KERNEL]}"-headers linux-firmware cryptsetup sudo device-mapper e2fsprogs ntfs-3g inetutils logrotate lvm2 man-db mdadm nano netctl pciutils perl procps-ng sysfsutils texinfo usbutils util-linux vi xfsprogs openssh git autoconf automake binutils bison fakeroot findutils flex gcc libtool m4 make pacman patch pkgconf which networkmanager btrfs-progs unzip wget alsa-utils htop)
+archBasePackages=(base "${USERVARIABLES[KERNEL]}" "${USERVARIABLES[KERNEL]}"-headers "$CPUTYPE"-ucode linux-firmware cryptsetup sudo device-mapper e2fsprogs ntfs-3g inetutils logrotate lvm2 man-db mdadm nano netctl pciutils perl procps-ng sysfsutils texinfo usbutils util-linux vi xfsprogs openssh git autoconf automake binutils bison fakeroot findutils flex gcc libtool m4 make pacman patch pkgconf which networkmanager btrfs-progs unzip wget alsa-utils htop)
 
 #Guest Type Packages
 vboxGuestPackages=(virtualbox-guest-utils)
