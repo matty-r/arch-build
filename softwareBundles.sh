@@ -66,7 +66,7 @@ devPackages=(visual-studio-code-bin qtcreator)
 
 #Boot Packages
 grubPackages=(grub "$CPUTYPE"-ucode os-prober efibootmgr)
-refindPackages=(refind-efi "$CPUTYPE"-ucode)
+refindPackages=(refind "$CPUTYPE"-ucode)
 
 #Wine Gaming Packages
 #https://github.com/lutris/lutris/wiki/Game:-Blizzard-App

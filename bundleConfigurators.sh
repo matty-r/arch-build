@@ -70,9 +70,9 @@ btrfsPackages-Config(){
 
 refindPackages-Config(){
 sudo bash -c 'cat << EOF > /boot/refind_linux.conf
-"Boot with standard options"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux.img"
-"Boot using fallback initramfs"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux-fallback.img"
-"Boot to terminal"  "root=UUID=$ROOTUUID rw add_efi_memmap initrd=$CPUTYPE-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
+"Boot with standard options"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img"
+"Boot using fallback initramfs"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux-fallback.img"
+"Boot to terminal"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
 EOF'
 }
 
