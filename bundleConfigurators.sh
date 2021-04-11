@@ -63,16 +63,26 @@ btrfsPackages-Config(){
   elif [[ "${USERVARIABLES[BOOTLOADER]}" = "REFIND" ]]; then
     # sudo yay -S --noconfirm refind-btrfs\
     ## TODO
-    echo "REFIND + BTRFS integration has not yet been implemented"
+    echo "REFIND + BTRFS snapshot integration has not yet been implemented"
   fi
   sudo systemctl enable snapper-boot.timer
 }
 
 refindPackages-Config(){
+ROOTUUID=$(sudo blkid -s UUID -o value "${USERVARIABLES[ROOTPART]}")
+
+if [[ "${USERVARIABLES[ROOTFILE]}" = "BTRFS" ]]; then
+  sudo refind-install --alldrivers
+  sudo sed -i 's|also_scan_dirs.*|& @/boot|g' /boot/EFI/refind/refind.conf
+  BTRFSEXTRA="rootflags=subvol=@ "
+else
+  sudo refind-install
+fi
+
 sudo bash -c 'cat << EOF > /boot/refind_linux.conf
-"Boot with standard options"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img"
-"Boot using fallback initramfs"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux-fallback.img"
-"Boot to terminal"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
+"Boot with standard options"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img"
+"Boot using fallback initramfs"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux-fallback.img"
+"Boot to terminal"  "root=UUID='"$ROOTUUID"' rw add_efi_memmap '"$BTRFSEXTRA"'initrd='"$CPUTYPE"'-ucode.img initrd=initramfs-linux.img systemd.unit=multi-user.target"
 EOF'
 }
 
